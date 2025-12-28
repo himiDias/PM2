@@ -19,7 +19,7 @@ namespace prog_man
         Initialises database, creates if not exists
         Creates Course, Year , Module and Assessment Tables
         */
-        DatabaseManager(std::string username, std::string password);
+        DatabaseManager(std::string username);
         // destructor for a database manager
         ~DatabaseManager();
 
@@ -61,6 +61,8 @@ namespace prog_man
     private:
         sqlite3 *db_;
         std::string db_path_;
+
+        void initialiseDB();
     };
 
 }
