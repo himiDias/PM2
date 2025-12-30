@@ -24,23 +24,23 @@ namespace prog_man
         ~DatabaseManager();
 
         // ADD table rows
-        void addCourse(std::string course_name, int grade);
+        void addCourse(std::string course_name, float grade);
 
-        void addYear(int year_num, int course_id, int weight, int grade);
+        void addYear(int year_num, int course_id, int weight, float grade);
 
-        void addModule(std::string module_code, std::string module_name, int year_id, int credits, int grade);
+        void addModule(std::string module_code, std::string module_name, int year_id, int credits, float grade);
 
-        void addAssessment(AssessmentType assessment_type, int module_id, int weight, int grade);
+        void addAssessment(AssessmentType assessment_type, int module_id, int weight, float grade);
 
         // Update table rows
 
-        void updateCourse(int course_id, std::string new_course_name, int new_grade);
+        void updateCourse(int course_id, std::string new_course_name, float new_grade);
 
-        void updateYear(int year_id, int new_year_num, int new_weight, int new_grade);
+        void updateYear(int year_id, int new_year_num, int new_weight, float new_grade);
 
-        void updateModule(int module_id, std::string new_module_code, std::string new_module_name, int new_credits, int new_grade);
+        void updateModule(int module_id, std::string new_module_code, std::string new_module_name, int new_credits, float new_grade);
 
-        void updateAssessment(int assessment_id, AssessmentType new_assessment_type, int new_weight, int new_grade);
+        void updateAssessment(int assessment_id, AssessmentType new_assessment_type, int new_weight, float new_grade);
 
         // Delete table rows
 
