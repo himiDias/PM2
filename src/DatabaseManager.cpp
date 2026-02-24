@@ -131,8 +131,10 @@ namespace prog_man
         {
         case AssessmentType::COURSEWORK:
             type = "COURSEWORK";
+            break;
         case AssessmentType::EXAM:
             type = "EXAM";
+            break;
         default:
             throw std::runtime_error("DatabaseManager.cpp || INVALID TYPE : Assessment type invalid \n");
         }
@@ -244,8 +246,10 @@ namespace prog_man
         {
         case AssessmentType::COURSEWORK:
             type = "COURSEWORK";
+            break;
         case AssessmentType::EXAM:
             type = "EXAM";
+            break;
         default:
             throw std::runtime_error("DatabaseManager.cpp || INVALID TYPE : Assessment type invalid \n");
         }
@@ -399,7 +403,7 @@ namespace prog_man
 
         int ret_code_ys = sqlite3_prepare_v2(db_, "SELECT id FROM years WHERE course_id = ?;", -1, &stmt, nullptr);
 
-        if (ret_code != SQLITE_OK)
+        if (ret_code_ys != SQLITE_OK)
         {
             throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
         }
@@ -488,9 +492,9 @@ namespace prog_man
             for each module id, call getModuleSummary, and put into a vector
         */
 
-        int ret_code_ys = sqlite3_prepare_v2(db_, "SELECT id FROM modules WHERE year_id = ?;", -1, &stmt, nullptr);
+        int ret_code_ms = sqlite3_prepare_v2(db_, "SELECT id FROM modules WHERE year_id = ?;", -1, &stmt, nullptr);
 
-        if (ret_code != SQLITE_OK)
+        if (ret_code_ms != SQLITE_OK)
         {
             throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
         }
@@ -592,9 +596,9 @@ namespace prog_man
             for each assessment id, call getAssessment, and put into a vector
         */
 
-        int ret_code_ys = sqlite3_prepare_v2(db_, "SELECT id FROM assessments WHERE module_id = ?;", -1, &stmt, nullptr);
+        int ret_code_as = sqlite3_prepare_v2(db_, "SELECT id FROM assessments WHERE module_id = ?;", -1, &stmt, nullptr);
 
-        if (ret_code != SQLITE_OK)
+        if (ret_code_as != SQLITE_OK)
         {
             throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
         }
