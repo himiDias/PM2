@@ -53,10 +53,15 @@ namespace prog_man
         void deleteAssessment(int assessment_id);
 
         // Get row info
-        CourseData getCourse(int module_id);
-        YearData getYear(int module_id);
+        CourseData getCourse(int course_id);
+        YearSummary getYearSummary(int year_id);
+
+        YearData getYear(int year_id);
+        ModuleSummary getModuleSummary(int module_id);
+
         ModuleData getModule(int module_id);
-        AssessmentData getAssessment(int module_id);
+        
+        AssessmentData getAssessment(int assessment_id);
 
     private:
         sqlite3 *db_;

@@ -273,7 +273,7 @@ namespace prog_man
 
         if (ret_code != SQLITE_OK)
         {
-            throw std::runtime_error("Failed to prepare update statement: " + std::string(sqlite3_errmsg(db_)));
+            throw std::runtime_error("Failed to prepare delete statement: " + std::string(sqlite3_errmsg(db_)));
         }
 
         sqlite3_bind_int(stmt, 1, course_id);
@@ -296,7 +296,7 @@ namespace prog_man
 
         if (ret_code != SQLITE_OK)
         {
-            throw std::runtime_error("Failed to prepare update statement: " + std::string(sqlite3_errmsg(db_)));
+            throw std::runtime_error("Failed to prepare delete statement: " + std::string(sqlite3_errmsg(db_)));
         }
 
         sqlite3_bind_int(stmt, 1, year_id);
@@ -319,7 +319,7 @@ namespace prog_man
 
         if (ret_code != SQLITE_OK)
         {
-            throw std::runtime_error("Failed to prepare update statement: " + std::string(sqlite3_errmsg(db_)));
+            throw std::runtime_error("Failed to prepare delete statement: " + std::string(sqlite3_errmsg(db_)));
         }
 
         sqlite3_bind_int(stmt, 1, module_id);
@@ -342,7 +342,7 @@ namespace prog_man
 
         if (ret_code != SQLITE_OK)
         {
-            throw std::runtime_error("Failed to prepare update statement: " + std::string(sqlite3_errmsg(db_)));
+            throw std::runtime_error("Failed to prepare delete statement: " + std::string(sqlite3_errmsg(db_)));
         }
 
         sqlite3_bind_int(stmt, 1, assessment_id);
@@ -359,21 +359,303 @@ namespace prog_man
 
     CourseData DatabaseManager::getCourse(int course_id)
     {
-        return {};
+        sqlite3_stmt *stmt;
+
+        CourseData data;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT title, grade FROM courses WHERE id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        sqlite3_bind_int(stmt, 1, course_id);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            data.id = course_id;
+
+            // Extracting columns (0-indexed based on your SELECT statement)
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+
+            data.course_name = reinterpret_cast<const char *>(text);
+            data.grade = sqlite3_column_double(stmt, 1);
+        }
+        else
+        {
+            sqlite3_finalize(stmt);
+            throw std::runtime_error("Course ID " + std::to_string(course_id) + " not found.");
+        }
+
+        sqlite3_finalize(stmt);
+
+        /*
+            NEED TO GET YEARS ASSOCIATED TO COURSE
+            //requires,
+            Searching the years table, for course id that matches this course id
+            for each year id, call getYearSummary, and put into an array
+        */
+
+        int ret_code_ys = sqlite3_prepare_v2(db_, "SELECT id FROM years WHERE course_id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+        sqlite3_bind_int(stmt, 1, course_id);
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int year_id = sqlite3_column_int(stmt, 0);
+
+            YearSummary ys = getYearSummary(year_id);
+            data.years.push_back(ys);
+        }
+        sqlite3_finalize(stmt);
+
+        return data;
+    }
+
+    YearSummary DatabaseManager::getYearSummary(int year_id)
+    {
+        sqlite3_stmt *stmt;
+
+        YearSummary summary;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT year, weight, grade FROM years WHERE id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        sqlite3_bind_int(stmt, 1, year_id);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            summary.id = year_id;
+            summary.year_num = sqlite3_column_int(stmt, 0);
+            summary.weight = sqlite3_column_int(stmt, 1);
+            summary.grade = sqlite3_column_double(stmt, 2);
+        }
+        else
+        {
+            sqlite3_finalize(stmt);
+            throw std::runtime_error("Year ID " + std::to_string(year_id) + " not found.");
+        }
+
+        sqlite3_finalize(stmt);
+
+        return summary;
     }
 
     YearData DatabaseManager::getYear(int year_id)
     {
-        return {};
+        sqlite3_stmt *stmt;
+
+        YearData data;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT year, weight, grade, course_id FROM years WHERE id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        sqlite3_bind_int(stmt, 1, year_id);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            data.id = year_id;
+            data.year_num = sqlite3_column_int(stmt, 0);
+            data.weight = sqlite3_column_int(stmt, 1);
+            data.grade = sqlite3_column_double(stmt, 2);
+            data.course_id = sqlite3_column_int(stmt, 3);
+        }
+        else
+        {
+            sqlite3_finalize(stmt);
+            throw std::runtime_error("Course ID " + std::to_string(year_id) + " not found.");
+        }
+
+        sqlite3_finalize(stmt);
+
+        /*
+            NEED TO GET MODULE ASSOCIATED TO YEAR
+            //requires,
+            Searching the module table, for module id that matches this year id
+            for each module id, call getModuleSummary, and put into a vector
+        */
+
+        int ret_code_ys = sqlite3_prepare_v2(db_, "SELECT id FROM modules WHERE year_id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+        sqlite3_bind_int(stmt, 1, year_id);
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int module_id = sqlite3_column_int(stmt, 0);
+
+            ModuleSummary ms = getModuleSummary(module_id);
+            data.modules.push_back(ms);
+        }
+        sqlite3_finalize(stmt);
+
+        return data;
+    }
+
+    ModuleSummary DatabaseManager::getModuleSummary(int module_id)
+    {
+        sqlite3_stmt *stmt;
+
+        ModuleSummary summary;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT code, title, credits, grade FROM modules WHERE id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        sqlite3_bind_int(stmt, 1, module_id);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            summary.id = module_id;
+
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+            summary.module_code = reinterpret_cast<const char *>(text);
+
+            text = sqlite3_column_text(stmt, 1);
+            summary.module_name = reinterpret_cast<const char *>(text);
+
+            summary.credits = sqlite3_column_int(stmt, 2);
+            summary.grade = sqlite3_column_double(stmt, 3);
+        }
+        else
+        {
+            sqlite3_finalize(stmt);
+            throw std::runtime_error("Module ID " + std::to_string(module_id) + " not found.");
+        }
+
+        sqlite3_finalize(stmt);
+
+        return summary;
     }
 
     ModuleData DatabaseManager::getModule(int module_id)
     {
+        sqlite3_stmt *stmt;
+
+        ModuleData data;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT code, title, credits, grade, year_id FROM modules WHERE id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        sqlite3_bind_int(stmt, 1, module_id);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            data.id = module_id;
+
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+            data.module_code = reinterpret_cast<const char *>(text);
+
+            text = sqlite3_column_text(stmt, 1);
+            data.module_name = reinterpret_cast<const char *>(text);
+
+            data.credits = sqlite3_column_int(stmt, 2);
+            data.grade = sqlite3_column_double(stmt, 3);
+
+            data.year_id = sqlite3_column_int(stmt, 4);
+        }
+        else
+        {
+            sqlite3_finalize(stmt);
+            throw std::runtime_error("Module ID " + std::to_string(module_id) + " not found.");
+        }
+
+        sqlite3_finalize(stmt);
+
+        /*
+            NEED TO GET ASSESSMENTS ASSOCIATED TO MODULE
+            //requires,
+            Searching the assessments table, for assessment id that matches this module id
+            for each assessment id, call getAssessment, and put into a vector
+        */
+
+        int ret_code_ys = sqlite3_prepare_v2(db_, "SELECT id FROM assessments WHERE module_id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+        sqlite3_bind_int(stmt, 1, module_id);
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int assessment_id = sqlite3_column_int(stmt, 0);
+
+            AssessmentData ad = getAssessment(assessment_id);
+            data.assessments.push_back(ad);
+        }
+        sqlite3_finalize(stmt);
+
+        return data;
         return {};
     }
 
     AssessmentData DatabaseManager::getAssessment(int assessment_id)
     {
-        return {};
+        sqlite3_stmt *stmt;
+
+        AssessmentData data;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT type, weight, grade, module_id FROM assessments WHERE id = ?;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        sqlite3_bind_int(stmt, 1, assessment_id);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            data.id = assessment_id;
+
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+            std::string typeStr = reinterpret_cast<const char *>(text);
+            if (typeStr == "COURSEWORK")
+            {
+                data.type = AssessmentType::COURSEWORK;
+            }
+            else
+            {
+                data.type = AssessmentType::EXAM;
+            }
+
+            data.weight = sqlite3_column_int(stmt, 1);
+
+            data.grade = sqlite3_column_double(stmt, 2);
+
+            data.module_id = sqlite3_column_int(stmt, 3);
+        }
+        else
+        {
+            sqlite3_finalize(stmt);
+            throw std::runtime_error("Assessment ID " + std::to_string(assessment_id) + " not found.");
+        }
+
+        sqlite3_finalize(stmt);
+        return data;
     }
 }

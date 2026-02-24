@@ -20,7 +20,7 @@ namespace prog_man
         int module_id;
         AssessmentType type;
         int weight;
-        int grade;
+        float grade;
     };
 
     struct ModuleData
@@ -30,8 +30,17 @@ namespace prog_man
         std::string module_code;
         std::string module_name;
         int credits;
-        int grade;
+        float grade;
         std::vector<AssessmentData> assessments;
+    };
+
+    struct ModuleSummary
+    {
+        int id;
+        std::string module_code;
+        std::string module_name;
+        int credits;
+        float grade;
     };
 
     struct YearData
@@ -40,16 +49,24 @@ namespace prog_man
         int course_id;
         int year_num;
         int weight;
+        float grade;
+        std::vector<ModuleSummary> modules;
+    };
+
+    struct YearSummary
+    {
+        int id;
+        int year_num;
+        int weight;
         int grade;
-        std::vector<ModuleData> modules;
     };
 
     struct CourseData
     {
         int id;
         std::string course_name;
-        int grade;
-        std::vector<YearData> years;
+        float grade;
+        std::vector<YearSummary> years;
     };
 
 }
