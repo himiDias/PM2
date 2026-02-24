@@ -177,26 +177,25 @@ namespace prog_man
         sqlite3_finalize(stmt);
     }
 
-    void DatabaseManager::updateYear(int year_id, int new_year_num, int new_weight, float new_grade)
+    void DatabaseManager::updateYear(int year_id, int new_weight, float new_grade)
     {
         sqlite3_stmt *stmt;
 
-        int ret_code = sqlite3_prepare_v2(db_, "UPDATE years SET year = ?, weight = ?, grade = ? WHERE id = ?", -1, &stmt, nullptr);
+        int ret_code = sqlite3_prepare_v2(db_, "UPDATE years SET  weight = ?, grade = ? WHERE id = ?", -1, &stmt, nullptr);
 
         if (ret_code != SQLITE_OK)
         {
             throw std::runtime_error("Failed to prepare update statement: " + std::string(sqlite3_errmsg(db_)));
         }
 
-        sqlite3_bind_double(stmt, 1, new_year_num);
-        sqlite3_bind_int(stmt, 2, new_weight);
-        sqlite3_bind_double(stmt, 3, new_grade);
-        sqlite3_bind_int(stmt, 4, year_id);
+        sqlite3_bind_int(stmt, 1, new_weight);
+        sqlite3_bind_double(stmt, 2, new_grade);
+        sqlite3_bind_int(stmt, 3, year_id);
 
         if (sqlite3_step(stmt) != SQLITE_DONE)
         {
             std::stringstream err;
-            err << "DatabaseManager.cpp || DB UPDATE FAILURE : Could not update year : " << year_id << ",VALS:" << new_year_num << "," << new_weight << "," << new_grade << "\n";
+            err << "DatabaseManager.cpp || DB UPDATE FAILURE : Could not update year : " << year_id << ",VALS:" << new_weight << "," << new_grade << "\n";
             throw std::runtime_error(err.str());
         }
 
@@ -230,39 +229,25 @@ namespace prog_man
         sqlite3_finalize(stmt);
     }
 
-    void DatabaseManager::updateAssessment(int assessment_id, AssessmentType new_assessment_type, int new_weight, float new_grade)
+    void DatabaseManager::updateAssessment(int assessment_id, int new_weight, float new_grade)
     {
         sqlite3_stmt *stmt;
 
-        int ret_code = sqlite3_prepare_v2(db_, "UPDATE assessments SET type = ?, weight = ?, grade = ? WHERE id = ?", -1, &stmt, nullptr);
+        int ret_code = sqlite3_prepare_v2(db_, "UPDATE assessments SET weight = ?, grade = ? WHERE id = ?", -1, &stmt, nullptr);
 
         if (ret_code != SQLITE_OK)
         {
             throw std::runtime_error("Failed to prepare update statement: " + std::string(sqlite3_errmsg(db_)));
         }
 
-        std::string type;
-        switch (new_assessment_type)
-        {
-        case AssessmentType::COURSEWORK:
-            type = "COURSEWORK";
-            break;
-        case AssessmentType::EXAM:
-            type = "EXAM";
-            break;
-        default:
-            throw std::runtime_error("DatabaseManager.cpp || INVALID TYPE : Assessment type invalid \n");
-        }
-
-        sqlite3_bind_text(stmt, 1, type.c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_int(stmt, 2, new_weight);
-        sqlite3_bind_double(stmt, 3, new_grade);
-        sqlite3_bind_int(stmt, 4, assessment_id);
+        sqlite3_bind_int(stmt, 1, new_weight);
+        sqlite3_bind_double(stmt, 2, new_grade);
+        sqlite3_bind_int(stmt, 3, assessment_id);
 
         if (sqlite3_step(stmt) != SQLITE_DONE)
         {
             std::stringstream err;
-            err << "DatabaseManager.cpp || DB UPDATE FAILURE : Could not update assessment : " << assessment_id << ",VALS:" << type << "," << new_weight << "," << new_grade << "\n";
+            err << "DatabaseManager.cpp || DB UPDATE FAILURE : Could not update assessment : " << assessment_id << ",VALS:" << new_weight << "," << new_grade << "\n";
             throw std::runtime_error(err.str());
         }
 

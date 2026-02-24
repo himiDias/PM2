@@ -36,11 +36,11 @@ namespace prog_man
 
         void updateCourse(int course_id, std::string new_course_name, float new_grade);
 
-        void updateYear(int year_id, int new_year_num, int new_weight, float new_grade);
+        void updateYear(int year_id, int new_weight, float new_grade);
 
         void updateModule(int module_id, std::string new_module_code, std::string new_module_name, int new_credits, float new_grade);
 
-        void updateAssessment(int assessment_id, AssessmentType new_assessment_type, int new_weight, float new_grade);
+        void updateAssessment(int assessment_id, int new_weight, float new_grade);
 
         // Delete table rows
 
@@ -60,7 +60,7 @@ namespace prog_man
         ModuleSummary getModuleSummary(int module_id);
 
         ModuleData getModule(int module_id);
-        
+
         AssessmentData getAssessment(int assessment_id);
 
     private:
