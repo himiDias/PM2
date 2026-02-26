@@ -69,6 +69,9 @@ namespace prog_man
         std::vector<YearSummary> years;
     };
 
+
+    
+
 }
 
 #endif
