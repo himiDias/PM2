@@ -69,8 +69,12 @@ namespace prog_man
         std::vector<YearSummary> years;
     };
 
-
-    
+    struct CourseSummary
+    {
+        int id;
+        std::string course_name;
+        float grade;
+    };
 
 }
 

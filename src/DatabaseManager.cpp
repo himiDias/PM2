@@ -6,8 +6,19 @@
 namespace prog_man
 {
 
-    DatabaseManager::DatabaseManager(std::string username)
+    DatabaseManager::DatabaseManager()
     {
+        db_ = nullptr;
+    }
+
+    void DatabaseManager::connect(std::string username)
+    {
+
+        if (db_ != nullptr)
+        {
+            return;
+        }
+
         db_path_ = "data/" + username + ".db";
 
         int ret_code = sqlite3_open(db_path_.c_str(), &db_);
@@ -24,10 +35,10 @@ namespace prog_man
     {
         std::string stmt = "PRAGMA foreign_keys=ON;";
 
-        stmt += "CREATE TABLE IF NOT EXISTS courses(id INTEGER AUTOINCREMENT PRIMARY KEY,title TEXT,grade REAL)";
-        stmt += "CREATE TABLE IF NOT EXISTS years(id INTEGER AUTOINCREMENT PRIMARY KEY,year INTEGER,weight INTEGER,grade REAL,course_id INTEGER,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)";
-        stmt += "CREATE TABLE IF NOT EXISTS modules(id INTEGER AUTOINCREMENT PRIMARY KEY,code TEXT,title TEXT,credits INTEGER,grade REAL,year_id INTEGER,FOREIGN KEY(year_id) REFERENCES years(id) ON DELETE CASCADE)";
-        stmt += "CREATE TABLE IF NOT EXISTS assessments(id INTEGER AUTOINCREMENT PRIMARY KEY,type TEXT,weight INTEGER,grade REAL,module_id INTEGER,FOREIGN KEY(module_id) REFERENCES modules(id) ON DELETE CASCADE)";
+        stmt += "CREATE TABLE IF NOT EXISTS courses(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,grade REAL);";
+        stmt += "CREATE TABLE IF NOT EXISTS years(id INTEGER PRIMARY KEY AUTOINCREMENT,year INTEGER,weight INTEGER,grade REAL,course_id INTEGER,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE);";
+        stmt += "CREATE TABLE IF NOT EXISTS modules(id INTEGER PRIMARY KEY AUTOINCREMENT,code TEXT,title TEXT,credits INTEGER,grade REAL,year_id INTEGER,FOREIGN KEY(year_id) REFERENCES years(id) ON DELETE CASCADE);";
+        stmt += "CREATE TABLE IF NOT EXISTS assessments(id INTEGER PRIMARY KEY AUTOINCREMENT,type TEXT,weight INTEGER,grade REAL,module_id INTEGER,FOREIGN KEY(module_id) REFERENCES modules(id) ON DELETE CASCADE);";
 
         char *errorMessage;
 
@@ -344,6 +355,35 @@ namespace prog_man
         }
 
         sqlite3_finalize(stmt);
+    }
+
+    std::vector<CourseSummary> DatabaseManager::getAllCourses()
+    {
+        sqlite3_stmt *stmt;
+
+        std::vector<CourseSummary> data;
+
+        int ret_code = sqlite3_prepare_v2(db_, "SELECT * FROM courses;", -1, &stmt, nullptr);
+
+        if (ret_code != SQLITE_OK)
+        {
+            throw std::runtime_error("Failed to prepare select statement: " + std::string(sqlite3_errmsg(db_)));
+        }
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+
+            CourseSummary cs;
+            cs.id = sqlite3_column_int(stmt, 0);
+            const unsigned char *txtPtr = sqlite3_column_text(stmt, 1);
+            cs.course_name = std::string(reinterpret_cast<const char *>(txtPtr));
+            cs.grade = sqlite3_column_double(stmt, 2);
+            data.push_back(cs);
+        }
+
+        sqlite3_finalize(stmt);
+
+        return data;
     }
 
     CourseData DatabaseManager::getCourse(int course_id)

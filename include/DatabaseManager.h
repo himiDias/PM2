@@ -4,6 +4,7 @@
 #include "Types.h"
 
 #include <string>
+#include <vector>
 #include <sqlite3.h>
 #include <stdexcept>
 
@@ -19,9 +20,11 @@ namespace prog_man
         Initialises database, creates if not exists
         Creates Course, Year , Module and Assessment Tables
         */
-        DatabaseManager(std::string username);
+        DatabaseManager();
         // destructor for a database manager
         ~DatabaseManager();
+
+        void connect(std::string username);
 
         // ADD table rows
         void addCourse(std::string course_name, float grade);
@@ -53,6 +56,8 @@ namespace prog_man
         void deleteAssessment(int assessment_id);
 
         // Get row info
+        std::vector<CourseSummary> getAllCourses();
+
         CourseData getCourse(int course_id);
         YearSummary getYearSummary(int year_id);
 

@@ -1,9 +1,9 @@
 # 1. Compiler and Flags
 CXX      := g++
 CC       := gcc
-CXXFLAGS := -std=c++17 -Wall -Wextra -Iinclude
+CXXFLAGS := -std=c++17 -Wall -Wextra -Iinclude -Iinclude/imgui
 CFLAGS   := -Iinclude
-LDFLAGS  := -lpthread -ldl
+LDFLAGS  := -lglfw -lGL -lpthread -ldl
 
 # 2. Paths
 SRC_DIR := src
@@ -16,13 +16,13 @@ TARGET := $(BIN_DIR)/ProgessManager
 
 # 4. Source Files
 # All your .cpp files in src/
-CPP_SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
+CPP_SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/imgui/*.cpp)
 # The sqlite3.c file in lib/
 C_SOURCES   := $(LIB_DIR)/sqlite3.c
 
 # 5. Object Files
 # Convert .cpp and .c paths to .o paths in the build/ folder
-OBJECTS := $(CPP_SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o) \
+OBJECTS := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(CPP_SOURCES)) \
            $(OBJ_DIR)/sqlite3.o
 
 # 6. Default Rule
@@ -35,7 +35,7 @@ $(TARGET): $(OBJECTS)
 
 # 8. Compile C++ Source Files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # 9. Compile the SQLite C Source File

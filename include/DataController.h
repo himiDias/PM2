@@ -10,6 +10,9 @@ namespace prog_man
     public:
         DataController(DatabaseManager manager);
 
+        // Connect to database
+        void loginUser(std::string username);
+
         // Adding objects
 
         void addAssessment(std::string type, int module_id, int weight, float grade);
@@ -47,6 +50,8 @@ namespace prog_man
         YearData getYearInfo(int year_id);
 
         CourseData getCourseInfo(int course_id);
+
+        std::vector<CourseSummary> getAllCoursesInfo();
 
         // Extra actions
 

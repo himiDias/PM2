@@ -7,6 +7,11 @@ namespace prog_man
     {
     }
 
+    void DataController::loginUser(std::string username)
+    {
+        manager.connect(username);
+    }
+
     void DataController::addAssessment(std::string type, int module_id, int weight, float grade)
     {
         if (grade < 0 || grade > 100)
@@ -106,6 +111,7 @@ namespace prog_man
         manager.deleteAssessment(assessment_id);
         syncModule(module_id);
     }
+
     void DataController::deleteModule(int module_id)
     {
         ModuleData data = getModuleInfo(module_id);
@@ -119,11 +125,13 @@ namespace prog_man
         manager.deleteYear(year_id);
         syncCourse(data.course_id);
     }
+
     void DataController::deleteCourse(int course_id) { manager.deleteCourse(course_id); }
 
     ModuleData DataController::getModuleInfo(int module_id) { return manager.getModule(module_id); }
     YearData DataController::getYearInfo(int year_id) { return manager.getYear(year_id); }
     CourseData DataController::getCourseInfo(int course_id) { return manager.getCourse(course_id); }
+    std::vector<CourseSummary> DataController::getAllCoursesInfo() { return manager.getAllCourses(); }
 
     void DataController::syncModule(int module_id)
     {

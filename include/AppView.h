@@ -13,7 +13,8 @@ namespace prog_man
         Login,
         Courses,
         Years,
-        Modules
+        Modules,
+        Assessments,
     };
 
     struct NavPoint
@@ -25,7 +26,7 @@ namespace prog_man
     class AppView
     {
     public:
-        AppView(DataController &ctrlr) : controller(ctrlr) {}
+        AppView(DataController &ctrlr);
 
         void render();
 
